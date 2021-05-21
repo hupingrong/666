@@ -1,0 +1,92 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>AddStu</title>
+    <script src="~/layui/jquery-2.1.1.min.js"></script>
+    <link href="~/layui/css/layui.css" rel="stylesheet" />
+    <script src="~/layui/layui.js"></script>
+    <script type="text/javascript">
+        //定义表单对象
+        var form = null;
+        //加载的时候获取layui的对象
+        layui.use('form', function () {
+            form = layui.form;
+
+            //为当前表单的下拉框赋选择事件
+            form.on("select", function (data) {
+                alert(data.elem);//表单
+                alert(data.value);//value
+                alert($("#class+div .layui-this").text()); //得到美化后的DOM对象
+            });
+        });
+        $(function () {
+            $.post("/Home/GetClassList", "", function (data) {
+                var options = "<option>请选择</option>";
+                for (var i = 0; i < data.length; i++) {
+                    options += "<option value='" + data[i].ClassID + "'>" + data[i].ClassName + "</option>";
+                }
+                //为标签写入option值
+                $("#class").html(options);
+                //加载option值
+                form.render('select');//需要加上本句代码才能显示出添加的option
+            });
+
+            $("#btnClose").click(function () {
+                var index = parent.layer.getFrameIndex(window.name);//根据当前窗口的名字获取当前窗口的索引
+                parent.layer.close(index);//关闭指定索引的窗口
+            });
+        })
+    </script>
+</head>
+<body>
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">学生姓名</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="StuName" name="StuName" lay-verify="required|number" placeholder="请输入姓名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">学生年龄</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="StuAge" name="StuAge" lay-verify="required|number" placeholder="请输入年龄" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">学生班级</label>
+            <div class="layui-input-block" style="width:100px">
+                <select id="class" name="class" lay-verify="required">
+                    <option value=""></option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">学员生日</label>
+            <div class="layui-input-block" style="width:100px">
+                <input type="text" class="layui-input" id="StuBron" placeholder="yyyy-MM-dd">
+            </div>
+        </div>
+        <input type="button" class="layui-btn" value="关闭" id="btnClose" />
+        <input type="button" value="获取下拉框值" id="btnSelect" />
+    </form>
+    <script type="text/javascript">
+        layui.use('laydate', function () {
+            laydate = layui.laydate;
+            laydate.render({
+                elem: '#StuBron'
+            });
+        });
+    </script>
+</body>
+</html>

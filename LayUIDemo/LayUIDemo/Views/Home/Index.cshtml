@@ -1,0 +1,120 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <script src="~/layui/jquery-2.1.1.min.js"></script>
+    <link href="~/layui/css/layui.css" rel="stylesheet" />
+    <script src="~/layui/layui.js"></script>
+    <script type="text/javascript">
+        //加载模块
+        //亦可加载特定模块：layui.use(['layer', 'laydate', function(){
+        //var table = null;
+        //layui.use(function () {
+        //layui.use(['layer', 'table'], function () {
+        //    //得到各种内置组件
+        //    layer = layui.layer //弹层
+        //        , table = layui.table //表格
+        //});
+    </script>
+</head>
+<body>
+    <div>
+        <table class="layui-hide" id="demo" lay-filter="test"></table>
+    </div>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+    </script>
+    <script>
+        layui.use(['table','layer'], function () {
+            var table = layui.table,
+                layer = layui.layer;
+            //执行一个 table 实例
+            table.render({
+                elem: '#demo' //指定要显示数据的表
+                , height: 420
+                , url: '/Home/GetAll' //数据接口
+                , title: '用户表'
+                , page: true //开启分页
+                , limit: 5
+                , limits: [5, 10, 15]
+                , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+                , cols: [[ //表头
+                    { type: 'checkbox', fixed: 'left' }
+                    , { field: 'StuID', title: '学员学号', width: 100, sort: true, fixed: 'left' }
+                    , { field: 'StuName', title: '学员姓名', width: 100 }
+                    , { field: 'StuAge', title: '学员年龄', width: 80, sort: true }
+                    , { field: 'ClassID', title: '学员班级', width: 80, sort: true }
+                    , { field: 'StuAddress', title: '家庭住址', width: 150, sort: true }
+                    , { fixed: 'right', width: 180, align: 'center', toolbar: '#barDemo' }
+                ]]
+            });
+            //监听头工具栏事件
+            table.on('toolbar(test)', function (obj) {
+                var checkStatus = table.checkStatus(obj.config.id)
+                    , data = checkStatus.data; //获取选中的数据
+                switch (obj.event) {
+                    case 'add':
+                        //layer.msg('添加');
+                        //弹出层
+                        layer.open({
+                            type: 2 //此处以iframe举例
+                            , title: '添加页面'
+                            , area: ['460px', '320px']
+                            , content: '/Home/AddStu'
+                        });
+                        break;
+                    case 'update':
+                        if (data.length == 0) {
+                            layer.msg('请选择一行');
+                        } else if (data.length > 1) {
+                            layer.msg('只能同时编辑一个');
+                        } else {
+                            layer.alert('编辑 [id]：' + checkStatus.data[0].StuID);
+                        }
+                        break;
+                    case 'delete':
+                        if (data.length == 0) {
+                            layer.msg('请选择一行');
+                        } else {
+                            layer.msg('删除');
+                        }
+                        break;
+                };
+            });
+            //监听行工具事件
+            table.on('tool(test)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                var data = obj.data //获得当前行数据
+                    , layEvent = obj.event; //获得 lay-event 对应的值
+                if (layEvent == 'detail') {
+                    layer.msg('查看操作' + data.StuID);
+                } else if (layEvent == 'edit') {
+                    layer.msg("编辑操作");
+                } else if (layEvent == 'del') {
+                    layer.confirm('真的删除行么', function (index) {
+                        obj.del(); //删除对应行（tr）的DOM结构
+                        layer.close(index);
+                        //向服务端发送删除指令
+                        //todo 完成后端的删除方法
+                    });
+                }
+            });
+            ////弹出层
+            //layer.open({
+            //    type: 2 //此处以iframe举例
+            //    , title: '添加页面'
+            //    , area: ['390px', '260px']
+            //    , content: '/Home/AddStu'
+            //});
+        });
+    </script>
+</body>
+</html>
